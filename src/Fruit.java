@@ -28,6 +28,7 @@ public class Fruit extends Node {
         return this.row;
     }
 
+    // Paint a fruit using the drawSquare method in Board
     public void paint(Graphics2D g, int squareWidth, int squareHeight) {
         Board.drawSquare(g, squareWidth, squareHeight, row, col, Color.orange);
 

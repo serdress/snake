@@ -9,6 +9,6 @@
  * @author alu23847452v
  */
 public class Config {
-public static int numRows = 30;
-public static int numCols = 40;
+public static int numRows = 10;
+public static int numCols = 15;
 }

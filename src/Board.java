@@ -6,53 +6,79 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
+import javax.swing.JDialog;
 import javax.swing.Timer;
 /*
  * @author alu23847452v
  */
+
 public class Board extends JPanel {
+
     private Snake snake;
     private Timer timer;
     private int deltaTime;
     private Graphics2D g2d;
-    private Node node;
+    private boolean gameOver;
     private Fruit fruit;
     private MyKeyAdapter keyAdepter;
     public boolean fruitIsDrawed;
+    private JDialog jDialog;
 
     public Board() {
         //Llamas al constructor de JPanel para obtener sus métodos
         super();
+        
+        // Creamos los elementos y les damos sus atributos iniciales
         /* Booleano para editar la posición de la fruta
-        sólo cuando la serpiente se lo haya comido*/
+         sólo cuando la serpiente se lo haya comido*/
         fruitIsDrawed = false;
         //Tiempo de refresco de pantalla
-        deltaTime = 150;
-        fruit = new Fruit(false, snake);
-        snake = new Snake(3);  
+        deltaTime = 200;        
         // Lector de teclas
         keyAdepter = new MyKeyAdapter();
         addKeyListener(keyAdepter);
         setFocusable(true);
-        snake.direction = snake.direction.RIGHT;
-        snake.oldDirection = snake.direction.RIGHT;
+        
         timer = new Timer(deltaTime, new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 mainLoop();
             }
         });
-        timer.start();
+        initGame();
     }
     
+    public void initGame() {
+         fruit = new Fruit(false, snake);
+        snake = new Snake(3);
+        snake.direction = snake.direction.RIGHT;
+        snake.oldDirection = snake.direction.RIGHT;
+        timer.start();
+    }
+
     //Bucle de refresco
     public void mainLoop() {
-        snake.avanceSnake();
-        repaint();
-    }   
+        if (snake.avanceSnakeAndEats(fruit)) {
+            moveFruit();
+        }
+        if (!snake.canMove()) {
+            showGameOverDialog();
+        }
 
+        repaint();
+    }
+
+    public void setDialog(JDialog jDialog) {
+        this.jDialog = jDialog;
+    }
+
+    public void showGameOverDialog() {
+        jDialog.pack();
+        jDialog.setVisible(true);
+    }
     /* Método de la clase extendida, al Overridearlo,
-    se llama al constructor pasándole los gráficos de nestro board.
-    Este método se ejecutará por cada repaint()*/
+     se llama al constructor pasándole los gráficos de nestro board.
+     Este método se ejecutará por cada repaint()*/
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -65,18 +91,23 @@ public class Board extends JPanel {
             }
         }
         // Pintamos los elementos del tablero
-        snake.paint(g2d, getSquareWidth(), getSquareHeight());
         fruit.paint(g2d, getSquareWidth(), getSquareHeight());
+        snake.paint(g2d, getSquareWidth(), getSquareHeight());
+
     }
 
-      public Fruit getFruit() {
-        return this.fruit;
+    public boolean gameOver() {
+        return gameOver;
     }
-    
+
+    public void moveFruit() {
+        fruit = new Fruit(false, snake);
+    }
+
     public int getSquareWidth() {
         return getWidth() / Config.numCols;
     }
-    
+
     public int getSquareHeight() {
         return getHeight() / Config.numRows;
     }
@@ -91,30 +122,40 @@ public class Board extends JPanel {
                     // Si no iba a la izquierda, ve a la derecha. Lo mismo con las otras direcciones 
                     if (snake.oldDirection != snake.direction.RIGHT) {
                         snake.direction = snake.direction.LEFT;
+                        repaint();
                     }
                     break;
                 case KeyEvent.VK_RIGHT:
                     snake.oldDirection = snake.direction;
                     if (snake.oldDirection != snake.direction.LEFT) {
                         snake.direction = snake.direction.RIGHT;
+                                repaint();
+
                     }
                     break;
                 case KeyEvent.VK_UP:
                     snake.oldDirection = snake.direction;
                     if (snake.oldDirection != snake.direction.DOWN) {
                         snake.direction = snake.direction.UP;
+                                repaint();
+
                     }
                     break;
                 case KeyEvent.VK_DOWN:
                     snake.oldDirection = snake.direction;
                     if (snake.oldDirection != snake.direction.UP) {
                         snake.direction = snake.direction.DOWN;
+                                repaint();
+
                     }
+                    break;
+                case KeyEvent.VK_Q:
+                    moveFruit();
             }
         }
     }
-    
-     public static void drawSquare(Graphics2D g, int squareWidth, int squareHeight, int row, int col, Color color) {
+
+    public static void drawSquare(Graphics2D g, int squareWidth, int squareHeight, int row, int col, Color color) {
         int x = col * squareWidth;
         int y = row * squareHeight;
         g.setColor(color);
