@@ -17,8 +17,8 @@ public class Fruit extends Node {
         
         this.special = special;
         Random rRC = new Random(); //Random Row/Col
-        row = (rRC.nextInt(Config.numRows)); //New Random Row
-        col = (rRC.nextInt(Config.numCols)); //New Random Col
+        row = (rRC.nextInt(Config.getIstance().numRows)); //New Random Row
+        col = (rRC.nextInt(Config.getIstance().numCols)); //New Random Col
         
     }
     

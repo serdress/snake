@@ -9,6 +9,21 @@
  * @author alu23847452v
  */
 public class Config {
-public static int numRows = 30;
-public static int numCols = 40;
+
+    private static Config instance = null;
+
+    private Config() {
+    }
+
+    public static Config getIstance() {
+        if (instance == null) {
+            instance = new Config();
+        }
+        return instance;
+    }
+
+    public int numRows = 30;
+    public int numCols = 40;
+
+
 }

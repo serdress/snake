@@ -182,7 +182,6 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonYesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonYesActionPerformed
-       board1.initGame();
        jDialogGameOver.setVisible(false);
     }//GEN-LAST:event_jButtonYesActionPerformed
 

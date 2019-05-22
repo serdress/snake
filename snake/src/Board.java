@@ -9,6 +9,8 @@ import java.util.Iterator;
 import javax.swing.JDialog;
 import javax.swing.Timer;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /*
  * @author alu23847452v
  */
@@ -17,6 +19,7 @@ public class Board extends JPanel {
 
     private Snake snake;
     private Timer timer;
+    private Timer timerIntro;
     private int deltaTime;
     private Graphics2D g2d;
     private boolean gameOver;
@@ -27,12 +30,12 @@ public class Board extends JPanel {
     private boolean isSnakeMoved;
     private Date date;
     private Date fruitDate;
-
+    private boolean intro;
 
     public Board() {
         super();
         fruitIsDrawed = false;
-        deltaTime = 100;
+        deltaTime = 30;
         keyAdepter = new MyKeyAdapter();
         addKeyListener(keyAdepter);
         setFocusable(true);
@@ -42,13 +45,44 @@ public class Board extends JPanel {
                 mainLoop();
             }
         });
-        initGame();
+
+        timerIntro = new Timer(deltaTime, new ActionListener() {
+            int counter = 0;
+
+            public void actionPerformed(ActionEvent evt) {
+                snake.body.add(0,snake.rightNode());
+                snake.body.remove(snake.body.size() - 1);
+                repaint();
+                counter++;
+                if (counter == Config.getIstance().numCols / 2) {
+                    timerIntro.stop();
+                    showGameOverDialog();
+                    //initGame();
+                }
+            }
+        });
+
+        initIntro();
+
     }
-    public void initGame() {
+
+    public void initIntro() {
         date = new Date();
         fruitDate = new Date();
         fruit = new Fruit(false, snake);
-        snake = new Snake(3);
+        snake = new Snake(3, 0);
+        snake.direction = snake.direction.RIGHT;
+        snake.oldDirection = snake.direction.RIGHT;
+        timerIntro.start();
+
+    }
+
+    public void initGame() {
+
+        date = new Date();
+        fruitDate = new Date();
+        fruit = new Fruit(false, snake);
+        snake = new Snake(3, Config.getIstance().numCols / 2);
         snake.direction = snake.direction.RIGHT;
         snake.oldDirection = snake.direction.RIGHT;
         timer.start();
@@ -57,12 +91,12 @@ public class Board extends JPanel {
     //Bucle de refresco
     public void mainLoop() {
         date = new Date();
-        System.out.println("Date "+date.getSeconds());
-        System.out.println("Fruit date "+fruitDate.getSeconds());
+     //   System.out.println("Date "+date.getSeconds());
+        //   System.out.println("Fruit date "+fruitDate.getSeconds());
         if (date.getSeconds() > fruitDate.getSeconds() + 3) {
             moveFruit();
         }
-        
+
         switch (snake.direction) {
             case UP:
                 if (!snake.canMove(snake.upNode())) {
@@ -89,18 +123,21 @@ public class Board extends JPanel {
                 }
                 break;
         }
-        
+
         isSnakeMoved = false;
         if (snake.avanceSnakeAndEats(fruit)) {
             moveFruit();
         }
-                    repaint();
+        repaint();
     }
 
     public void setDialog(JDialog jDialog) {
         this.jDialog = jDialog;
     }
-
+    
+    public boolean gameIsRunning() {
+        return timer.isRunning();
+    }
     public void showGameOverDialog() {
         jDialog.pack();
         jDialog.setVisible(true);
@@ -115,8 +152,8 @@ public class Board extends JPanel {
         // Convierte los gráficos en gráficos 2D para poder dibujar
         Graphics2D g2d = (Graphics2D) g;
         //Va pintando en cada fila y columna el cuadrado 
-        for (int row = 0; row < Config.numRows; row++) {
-            for (int col = 0; col < Config.numCols; col++) {
+        for (int row = 0; row < Config.getIstance().numRows; row++) {
+            for (int col = 0; col < Config.getIstance().numCols; col++) {
                 drawSquare(g2d, getSquareWidth(), getSquareHeight(), row, col, Color.pink, getWidthMargin(), getHeightMargin());
             }
         }
@@ -135,7 +172,7 @@ public class Board extends JPanel {
         System.out.println("Fruit" + fruitDate.getSeconds());
         fruit = new Fruit(false, snake);
     }
-    
+
     // Hack
     public void moveFruitInFrontOfSnake() {
         switch (snake.direction) {
@@ -155,11 +192,11 @@ public class Board extends JPanel {
     }
 
     public int getSquareWidth() {
-        return getWidth() / Config.numCols;
+        return getWidth() / Config.getIstance().numCols;
     }
 
     public int getSquareHeight() {
-        return getHeight() / Config.numRows;
+        return getHeight() / Config.getIstance().numRows;
     }
 
     class MyKeyAdapter extends KeyAdapter {
@@ -169,6 +206,7 @@ public class Board extends JPanel {
             if (!isSnakeMoved) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_LEFT:
+                        if (!gameIsRunning()) initGame();
                         snake.oldDirection = snake.direction;
                         // Si no iba a la izquierda, ve a la derecha. Lo mismo con las otras direcciones 
                         if (snake.oldDirection != snake.direction.RIGHT) {
@@ -178,6 +216,7 @@ public class Board extends JPanel {
                         }
                         break;
                     case KeyEvent.VK_RIGHT:
+                         if (!gameIsRunning()) initGame();
                         snake.oldDirection = snake.direction;
                         if (snake.oldDirection != snake.direction.LEFT) {
                             isSnakeMoved = true;
@@ -187,6 +226,7 @@ public class Board extends JPanel {
                         }
                         break;
                     case KeyEvent.VK_UP:
+                         if (!gameIsRunning()) initGame();
                         snake.oldDirection = snake.direction;
                         if (snake.oldDirection != snake.direction.DOWN) {
                             isSnakeMoved = true;
@@ -196,6 +236,7 @@ public class Board extends JPanel {
                         }
                         break;
                     case KeyEvent.VK_DOWN:
+                         if (!gameIsRunning()) initGame();
                         snake.oldDirection = snake.direction;
                         if (snake.oldDirection != snake.direction.UP) {
                             isSnakeMoved = true;
@@ -213,11 +254,11 @@ public class Board extends JPanel {
     }
 
     public int getWidthMargin() {
-        return (getWidth() - Config.numCols * getSquareWidth()) / 2;
+        return (getWidth() - Config.getIstance().numCols * getSquareWidth()) / 2;
     }
 
     public int getHeightMargin() {
-        return (getHeight() - Config.numRows * getSquareHeight()) / 2;
+        return (getHeight() - Config.getIstance().numRows * getSquareHeight()) / 2;
     }
 
     public static void drawSquare(Graphics2D g, int squareWidth, int squareHeight, int row, int col, Color color, int widthMargin, int heightMargin) {

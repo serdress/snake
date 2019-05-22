@@ -14,17 +14,17 @@ public class Snake {
     protected Directions direction;
     protected Directions oldDirection;
     private int remainingGrow;
-    private List<Node> body;
+    public List<Node> body;
     private Graphics2D g2d;
-    private int deltaTime;
     Iterator it;
 
     /* Se construye la serpiente a base de
      nodos situados desde la mitad del tablero hacia atras */
-    public Snake(int numNodes) {
+    public Snake(int numNodes, int col) {
         body = new ArrayList<Node>();
         for (int i = 0; i < numNodes; i++) {
-            body.add(new Node(Config.numRows / 2, Config.numCols / 2 - i));
+
+            body.add(new Node(Config.getIstance().numRows / 2, col - i));
         }
     }
 
@@ -33,7 +33,7 @@ public class Snake {
         int col = nextNode.getCol();
         int row = nextNode.getRow();
       // System.out.println("New node col:" + col + "New node row" + row);
-        if (col == -1 || col >= Config.numCols || row == -1 || row >= Config.numRows) {
+        if (col == -1 || col >= Config.getIstance().numCols || row == -1 || row >= Config.getIstance().numRows) {
             return false;
         } else {
             for (Node tail : body) {
@@ -46,6 +46,7 @@ public class Snake {
             return true;
         }
     }
+    
     
     public Node getHead() {
         Node node = body.get(0);
